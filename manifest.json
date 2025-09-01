@@ -1,20 +1,20 @@
 {
-  "name": "TiK app",
+  "name": "TiK",
   "short_name": "TiK",
-  "start_url": ".",
+  "start_url": "/TiK/", <!-- تم التعديل هنا (أضف اسم المستودع) -->
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#1E1E1E",
-  "description": "Just Tiks",
+  "description": "عداد شخصي فائق الأداء لتتبع العادات والأهداف.",
   "icons": [
     {
-      "src": "icons/192.png",
+      "src": "/TiK/icons/icon-192x192.png", <!-- تم التعديل هنا (أضف اسم المستودع) -->
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/512.png",
+      "src": "/TiK/icons/icon-512x512.png", <!-- تم التعديل هنا (أضف اسم المستودع) -->
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
