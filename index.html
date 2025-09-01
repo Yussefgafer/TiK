@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عدادي الشخصي</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1E1E1E"/>
+    <meta name="description" content="عداد شخصي فائق الأداء لتتبع العادات والأهداف.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <style>
+        /* الخطوط */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+        /* الألوان */
+        :root {
+            --bg-dark: #121212;
+            --bg-card: #1E1E1E;
+            --bg-button-dark-blue: #2D5AA0;
+            --text-light: #FFFFFF;
+            --text-secondary: #A0A0A0;
+            --reset-bg-red: #FF3B30;
+            --success: #34C759;
+            --success-glow: rgba(52, 199, 89, 0.7);
+            --main-transition-duration: 0.3s;
+        }
+
+        /* إعادة تعيين الأنماط الافتراضية */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .counter-input {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            font-size: 18px;
+            text-align: center;
+            width: 80%;
+            margin-bottom: 20px;
+            padding: 5px;
+            border-bottom: 1px solid var(--text-secondary);
+            outline: none;
+        }
+        .counter-input::-webkit-outer-spin-button,
+        .counter-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .counter-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        #counter-display-wrapper {
+            position: relative; 
+            overflow: hidden;
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            background: var(--bg-card);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: background 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+        }
+
+        #counter-display-wrapper.goal-achieved {
+            background: linear-gradient(145deg, #28a745, #218838);
+            box-shadow: 0 0 25px var(--success-glow);
+            animation: wrapper-pulse 1s ease-in-out;
+        }
+        
+        #counter-display-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient( to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: skewX(-25deg);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        #counter-display-wrapper.goal-achieved::after {
+            animation: shine-effect 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #counter-display {
+            font-size: 140px;
+            font-weight: bold;
+            color: var(--text-light);
+            line-height: 1;
+            user-select: none;
+            text-shadow: 0 0 10px rgba(76, 217, 100, 0.3);
+            transition: text-shadow 0.5s ease;
+            will-change: transform; 
+        }
+
+        #counter-display-wrapper.goal-achieved #counter-display {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes number-pop {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes goal-celebrate {
+            0% { transform: scale(1) rotate(0); }
+            25% { transform: scale(1.3) rotate(-5deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            75% { transform: scale(1.3) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        
+        @keyframes shine-effect {
+            0% { left: -150%; opacity: 0.6; }
+            100% { left: 150%; opacity: 0; }
+        }
+
+        @keyframes wrapper-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .animate-pop { animation: number-pop 0.3s ease-out; }
+        .animate-celebrate { animation: goal-celebrate 0.6s ease-in-out; }
+        .animate-pulse { animation: pulse 0.3s ease-in-out; }
+
+        .left-buttons-fixed, .right-buttons-fixed {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 900;
+        }
+        .left-buttons-fixed { left: 20px; width: 70px; }
+        .right-buttons-fixed { right: 20px; }
+
+        .action-button {
+            color: var(--text-light);
+            border: none;
+            border-radius: 50%;
+            padding: 0;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all var(--main-transition-duration) ease-in-out;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            user-select: none;
+        }
+        .action-button.plus { background: linear-gradient(145deg, var(--bg-button-dark-blue), #234580); }
+        .action-button.minus { background: linear-gradient(145deg, #3a3a3a, #2e2e2e); }
+        
+        #resetIconButton {
+            background: linear-gradient(145deg, var(--reset-bg-red), #cc2c24);
+            border: none;
+        }
+        #resetIconButton .trash-icon { stroke: var(--text-light); width: 28px; height: 28px; }
+
+        .action-button:hover:not(:disabled), #resetIconButton:hover:not(:disabled) {
+            box-shadow: 0 0 15px rgba(76, 217, 100, 0.5);
+            transform: translateY(-2px);
+        }
+        .action-button:active:not(:disabled), #resetIconButton:active:not(:disabled) {
+            transform: scale(0.95);
+            filter: brightness(0.9);
+            transition: transform 0.05s ease-out, filter 0.05s ease-out;
+        }
+        .action-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            width: 80%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.5s ease-in-out, background-color 0.5s ease;
+        }
+        .progress-bar.completed {
+            background-color: var(--success-glow);
+            box-shadow: 0 0 10px var(--success-glow);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <input type="number" class="counter-input" id="maxCountInput" placeholder="الحد الأقصى للعداد" value="100" min="0">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div id="counter-display-wrapper">
+            <span id="counter-display">0</span>
+        </div>
+    </div>
+
+    <div class="left-buttons-fixed">
+        <button class="action-button minus" data-value="-1">-1</button>
+        <button class="action-button" id="resetIconButton">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="trash-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+    </div>
+    
+    <div class="right-buttons-fixed">
+        <button class="action-button plus" data-value="1">+1</button>
+        <button class="action-button plus" data-value="3">+3</button>
+        <button class="action-button plus" data-value="4">+4</button>
+        <button class="action-button plus" data-value="11">+11</button>
+    </div>
+
+    <script>
+        let currentCount = 0;
+        let maxCount = 100;
+        let isAnimating = false;
+
+        const counterDisplayElement = document.getElementById('counter-display');
+        const resetIconButton = document.getElementById('resetIconButton');
+        const minusButton = document.querySelector('.action-button.minus');
+        const maxCountInput = document.getElementById('maxCountInput');
+        const progressBar = document.getElementById('progressBar');
+        const counterWrapper = document.getElementById('counter-display-wrapper');
+        
+        function updateProgressBar() {
+            const effectiveMax = maxCount > 0 ? maxCount : 1; 
+            const progress = Math.min((currentCount / effectiveMax) * 100, 100);
+            progressBar.style.width = progress + '%';
+            progressBar.classList.toggle('completed', progress >= 100);
+        }
+
+        function updateCounterDisplay(isGoalReached = false) {
+            counterDisplayElement.textContent = currentCount;
+            if (isAnimating) return;
+            isAnimating = true;
+            const animationClass = isGoalReached ? 'animate-celebrate' : 'animate-pop';
+            const animationDuration = isGoalReached ? 600 : 300;
+            counterDisplayElement.classList.add(animationClass);
+            setTimeout(() => {
+                counterDisplayElement.classList.remove(animationClass);
+                isAnimating = false;
+            }, animationDuration);
+        }
+
+        function updateUI(isGoalReached = false) {
+            updateCounterDisplay(isGoalReached);
+            updateProgressBar();
+            minusButton.disabled = currentCount === 0;
+            counterWrapper.classList.toggle('goal-achieved', maxCount > 0 && currentCount >= maxCount);
+        }
+
+        function changeCounter(value) {
+            const oldCount = currentCount;
+            let newCount = currentCount + value;
+            if (newCount < 0) newCount = 0;
+            
+            if (newCount !== currentCount) {
+                currentCount = newCount;
+                const goalReached = maxCount > 0 && oldCount < maxCount && currentCount >= maxCount;
+                updateUI(goalReached);
+            }
+        }
+
+        document.querySelectorAll('.action-button.plus, .action-button.minus').forEach(button => {
+            button.addEventListener('click', () => {
+                changeCounter(parseInt(button.dataset.value));
+                button.classList.add('animate-pulse');
+                setTimeout(() => button.classList.remove('animate-pulse'), 300);
+            });
+        });
+
+        resetIconButton.addEventListener('click', () => {
+            if (currentCount !== 0) {
+                currentCount = 0;
+                updateUI();
+            }
+        });
+
+        maxCountInput.addEventListener('input', () => {
+            const newValue = parseInt(maxCountInput.value);
+            maxCount = !isNaN(newValue) && newValue >= 0 ? newValue : 0;
+            updateUI();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            maxCount = parseInt(maxCountInput.value) || 100;
+            updateUI();
+        });
+
+        document.body.addEventListener('touchmove', (e) => {
+            if (e.target === counterDisplayElement || e.target === maxCountInput) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('Service Worker: Registered!'))
+                    .catch(err => console.log(`Service Worker: Error: ${err}`));
+            });
+        }
+    </script>
+</body>
+</html>
