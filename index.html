@@ -8,8 +8,8 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1E1E1E"/>
     <meta name="description" content="عداد شخصي فائق الأداء لتتبع العادات والأهداف.">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="manifest" href="./manifest.json"> <!-- تم التعديل هنا -->
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png"> <!-- تم التعديل هنا -->
 
     <style>
         /* الخطوط */
@@ -350,7 +350,7 @@
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js') <!-- تم التعديل هنا -->
                     .then(registration => console.log('Service Worker: Registered!'))
                     .catch(err => console.log(`Service Worker: Error: ${err}`));
             });
